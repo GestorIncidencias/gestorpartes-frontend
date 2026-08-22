@@ -946,6 +946,12 @@ button{cursor:pointer;border:none;border-radius:8px;padding:11px 14px;font-weigh
       <input id="admTipoHFinExtra" type="time" placeholder="Fin extra">
     </div>
     <label style="display:flex;align-items:center;gap:6px;margin:0 0 10px"><input type="checkbox" id="admTipoSinHorario" style="width:auto" onchange="toggleSinHorarioAdmin()"> Sin horario fijo (ej. servicio extraordinario puntual)</label>
+    <label style="font-weight:400;font-size:11px;color:var(--txt2);margin-bottom:2px">Franjas que cubre este tipo de turno (para los avisos de Seguimientos — vacío = se detecta por el nombre, o se asume que cubre todas si el nombre no es reconocible)</label>
+    <div id="admTipoFranjas" class="chk-toggle" style="margin-bottom:10px">
+      <button type="button" data-franja="Mañana" onclick="this.classList.toggle('on-correcto')">Mañana</button>
+      <button type="button" data-franja="Tarde" onclick="this.classList.toggle('on-correcto')">Tarde</button>
+      <button type="button" data-franja="Noche" onclick="this.classList.toggle('on-correcto')">Noche</button>
+    </div>
     <button class="btn-ghost" style="width:100%;margin-bottom:16px" onclick="guardarNuevoTipoTurno()">+ Añadir tipo de turno</button>
 
     <div class="section-label">Unidades</div>
@@ -1123,7 +1129,7 @@ button{cursor:pointer;border:none;border-radius:8px;padding:11px 14px;font-weigh
 <div id="toast" class="toast"></div>
 
 <script>
-const API = 'https://script.google.com/macros/s/AKfycbwXM_4eInyp6I64wCyIbcRR-O4Z97hUn2KMU53IOICe9Sd9IWq0jEB-uxCHWdHlTFZCFQ/exec';
+const API = 'https://script.google.com/macros/s/AKfycbw6h1jl6s1QNH1_pheM-NW9W97Gf1p_eqTVzTORFLqgdA2OQKMIf9i25-Ai47tPLSMb/exec';
 // Callejero de La Zubia embebido (Reporte 17) — fuente: Callejero del Censo Electoral,
 // INE, versión enero 2021. Sin dependencia de ninguna API externa: funciona sin cobertura.
 const CALLEJERO_LA_ZUBIA = ["Calle 29 de Abril", "Calle 3 de Abril de 1979", "Calle Acequia Gorda", "Camino de los Acequieros", "Calle Adolfo Perez Esquivel", "Calle Aguas Blanquillas", "Calle Aguila", "Calle Agustin Molina Garcia", "Calle Aixa", "Calle Albacete", "Calle Albahaca", "Calle Albolote", "Calle Alcala", "Calle Alcalde Francisco Perez Lopez", "Calle Alcazaba", "Calle Alce", "Calle Alegria", "Calle Alfacar", "Calle Alfonso X", "Calle Alga", "Calle Algarabia", "Calle Algarrobo", "Calle Alhambra", "Camino Alhendin", "Calle Alicante", "Calle Aljibe", "Calle Almanzor", "Calle Almendros", "Calle Almeria", "Calle Almes", "Calle Almiar", "Calle Almuñecar", "Calle Alondra", "Calle Alonso Cano", "Plaza Alonso Cano", "Camino Alto de los Ogijares", "Calle Amapola", "Calle Ana Maria Matute", "Calle Ana Orantes", "Calle Andalucia", "Plaza Andalucia", "Calle Andres Rodriguez Terrones", "Calle Andres Vargas", "Calle Aneto", "Calle Angel Ganivet", "Calle Anibal del Campo Diaz", "Calle Antequera", "Calle Antonio Garzon Barrero", "Calle Antonio Machado", "Calle Antonio Molina Lopez", "Calle Antonio Navarro", "Calle Antonio Quesada Sanchez", "Calle Antonio Sanchez Sanchez", "Calle Arcipreste de Hita", "Calle Arenal", "Calle Argentina", "Calle Armilla", "Calle Armonia", "Calle Arrayanes", "Calle Asturias", "Calle Atarazana", "Calle Atarfe", "Calle Aventadores", "Calle Avila", "Calle Aviles", "Plaza Ayuntamiento", "Calle Azahar", "Calle Azorin", "Calle Azucena", "Calle Badajoz", "Calle Baja de San Antonio", "Calle Barcelona", "Calle Barcinadores", "Calle Barranco", "Calle Barranco del Tomillo", "Calle Baño", "Calle Benidorm", "Calle Benito Perez Galdos", "Calle Berro", "Calle Bilbao", "Calle Blas de Otero", "Calle Blas Infante", "Plaza Blas Leoncio de Piñar", "Calle Blasco Ibañez", "Calle Boabdil", "Calle Brasil", "Calle Buenos Aires", "Calle Buero Vallejo", "Calle Burgos", "Calle Caceres", "Calle Cadiz", "Camino Cajar", "Calle la Cajetia", "Calle Calderon de la Barca", "Calle Calvario", "Calle Camilo Jose Cela", "Calle Campanas", "Calle Canario", "Calle Candil", "Calle Canteras", "Calle Cantina del Rute", "Calle Carmen Laforet", "Calle Carmen Martin Gaite", "Calle Cartagena", "Calle Castilla", "Calle Castillo", "Calle Cañada de los Priscos", "Calle Cañamo", "Calle Cementerio", "Calle Cenes de la Vega", "Calle Centeno", "Calle Cercado", "Calle Cerezo", "Calle Cervantes", "Calle Chana", "Calle Charinas", "Calle Chauchina", "Calle Chile", "Calle Chorreras", "Calle Churriana de la Vega", "Calle Cid Campeador", "Calle Ciudad Real", "Calle Clavel", "Plaza del Clero", "Calle Codorniz", "Calle Colibri", "Calle Collado del Tejarillo", "Calle del Comercio", "Calle Concordia", "Plaza de la Constitucion", "Calle Cordoba", "Calle Corredera", "Calle Cortijo del Aire", "Lugar Cortijo los Angeles", "Cuesta Corvales", "Calle las Cruces", "Plaza de la Cruz", "Calle Cruz de San Anton", "Calle Cuclillo", "Calle Cuco", "Calle Cuenca", "Calle Cullar Vega", "Calle Dalia", "Calle Damaso Alonso", "Calle Dau", "Calle Delicias", "Calle Desmond Tutu", "Calle Diego Velazquez", "Calle Dilar", "Glorieta Doctor Luis Masats", "Calle Don Quijote", "Calle Dornajo", "Calle Doña Francisca", "Calle Durcal", "Calle Ejercito", "Calle Elena Martin Vivaldi", "Calle Emilia Pardo Bazan", "Calle Emilio Prados", "Calle Empedrado Alto", "Calle Empedrado Bajo", "Calle Encanto", "Camino Enmedio", "Calle Eras Altas", "Calle Eras del Calvario", "Plaza de la Erilla", "Calle Ermitaño Este", "Calle Ermitaño Norte", "Calle Ermitaño Oeste", "Calle Ermitaño Sur", "Plaza Escorial", "Calle Escuelas", "Calle Espadadores", "Calle Esparto", "Plaza España", "Calle Espliego", "Calle Esquina de la Virgen", "Calle Estrella", "Calle Everest", "Calle Extremadura", "Calle Fabriquilla", "Calle Faisan", "Calle Felix Rodriguez de la Fuente", "Calle Fernan Caballero", "Calle Fernandez Arroyo", "Calle Fernando Barrero", "Calle Fernando de los Rios", "Calle Flor", "Camino Forestal", "Calle Francisco de Quevedo", "Calle Francisco Molina Lopez", "Calle Fraternidad", "Calle Fuente Fria", "Calle Fuente Vaqueros", "Calle las Gabias", "Calle Gabriel Garcia Marquez", "Calle Gabriel Miro", "Calle Galicia", "Avenida Gandhi", "Calle Garcia Lorca", "Calle Garcilaso de la Vega", "Calle Garza Real", "Calle Garzon", "Calle Genil", "Avenida Genital", "Calle Geranio", "Calle Gerardo Diego", "Calle Gloria Fuertes", "Camino Gojar", "Calle Golondrina", "Calle Gongora", "Calle Gonzalo de Berceo", "Calle Goya", "Calle Granada", "Calle Granja", "Calle el Greco", "Calle Gredos", "Calle Gregorio Marañon", "Calle Guadalajara", "Calle Guadalquivir", "Calle Guejar Sierra", "Calle Guevejar", "Calle Halcon", "Calle Hazuelas", "Calle Hermanos Alvarez Quintero", "Calle Herreria", "Calle Hierbabuena", "Calle Higueras", "Calle Honduras", "Plaza del Horno", "Calle Huelva", "Calle Huerta Nueva", "Calle Huerto de la Muharra", "Calle Huerto del Carbonero", "Calle los Huertos", "Calle Huesca", "Calle Huetor Vega", "Calle Iberos", "Calle Igualdad", "Calle Independencia", "Calle Infantas", "Calle Isaac Albeniz", "Calle Isaac Peral", "Calle Jacinto Benavente", "Calle Jaen", "Calle Jardines", "Calle Javier Espronceda", "Calle Jazmin", "Calle Jerez", "Calle Jilguero", "Calle Joan Miro", "Calle Joaquin Costa", "Calle Jorge Guillen", "Calle Jorge Manrique", "Calle Jose Cappa Ibañez", "Calle Jose Echegaray", "Calle Jose Maria de Pereda", "Calle Jose Morales", "Calle Jose Pertiñez Quesada", "Calle Jose Riquelme", "Calle Jose Zorrilla", "Calle Juan Ramon Jimenez", "Calle Juan Valera", "Calle Julian Besteiro", "Calle Julio Romero de Torres", "Calle Jun", "Calle Junco", "Calle Lachar", "Calle Laguna de las Yeguas", "Calle Lastras", "Calle Laurel de la Reina", "Calle el Lazarillo de Tormes", "Calle Leon", "Calle Leon Felipe", "Calle Leopoldo Alas Clarin", "Calle Levante", "Calle Leñadores", "Calle Libertad", "Calle Libreros", "Calle Lindero", "Calle Lino", "Calle Lirio", "Calle Logroño", "Calle Loja", "Calle Lope de Rueda", "Calle Lope de Vega", "Calle Lopez de Ayala", "Calle Lugo", "Calle Luis Cernuda", "Calle Luis Rosales", "Calle Luna", "Avenida Madrid", "Calle Maizal", "Calle Malaga", "Calle Manuel Altolaguirre", "Calle Manuel Azaña", "Calle Manuel de Falla", "Calle Manuel Prieto Moreno", "Calle Manuel Roldan Prieto", "Calle Manuel Vazquez Montalban", "Calle Maracena", "Calle Margarita", "Calle Mariano Jose de Larra", "Calle las Marinas", "Calle Marques de Santillana", "Calle Martin Pescador", "Glorieta Martinez de la Rosa", "Calle Matadero", "Calle Mejico", "Calle Mejorana", "Calle de la Menta", "Calle Miguel Delibes", "Calle Miguel Unamuno", "Calle Mimbre", "Calle Mirador de Corvales", "Calle Mirlo", "Calle Mirto", "Calle Molino", "Camino Monachil", "Calle Moncayo", "Calle Monte", "Calle Motril", "Calle Mulhacen", "Calle Murcia", "Calle Murillo", "Calle Muñoz Seca", "Calle Naranjo", "Calle Narciso Monturiol", "Calle Nardos", "Barranco de la Negra", "Calle Nelson Mandela", "Calle Nogal", "Calle Norte", "Calle Nueva", "Plaza Obispo Reyes", "Camino Ogijares", "Calle Olivo", "Calle Olmo", "Calle Olof Palme", "Calle Orense", "Calle Ortega Y Gasset", "Calle Otura", "Calle Oviedo", "Calle Pablo Iglesias", "Calle Pablo Neruda", "Calle Pablo Picasso", "Calle Padre Villoslada", "Calle Pajaro Carpintero", "Calle Palencia", "Calle Paloma", "Calle Pamplona", "Calle Panama", "Calle los Paraisos", "Calle Paredillas", "Calle Parra", "Calle Parrales", "Calle Pasaderas", "Calle Pasillo", "Calle Pastrana", "Plaza de la Paz", "Calle Pedro Antonio de Alarcon", "Calle Pedro Salinas", "Calle Pelicano", "Calle Peligros", "Calle Pensamiento", "Calle Petunia", "Calle Picon", "Calle Pilar", "Plaza del Pilar", "Calle los Pinos", "Calle Pinos Genil", "Calle Pinos Puente", "Calle Pintor Fernando Zobel", "Calle Pintor Lopez Mezquita", "Calle Pintor Manuel Angeles Ortiz", "Calle Pinzon", "Calle Pio Baroja", "Calle Platero", "Calle Polideportivo", "Calle Poniente", "Calle Pontevedra", "Calle los Portones", "Calle Portugal", "Calle Presbitero Pedro Ruiz de Valdivia", "Calle Primero de Mayo", "Calle Primo", "Calle Priscos Bajos", "Calle Profesor Francisco Alonso", "Calle Profesora Esperanza Pereda", "Calle Pulianas", "Calle Quentar", "Calle Rafael Alberti", "Calle Rafael Lara Sanchez", "Calle Rafael Piñar Quesada", "Calle Ramon J. Sender", "Calle Ramon Y Cajal", "Calle Real", "Calle Reconquista", "Plaza Rey Juan Carlos Primero", "Calle Rigoberta Menchu", "Calle Rincon de la Victoria", "Calle Rio Alhama", "Calle Rio Castril", "Calle Rio Cubillas", "Calle Rio Darro", "Calle Rio Fardes", "Calle Rio Guadalentin", "Calle Rio Guadalfeo", "Calle Rio Guadiana Menor", "Calle Rio Guardal", "Calle Rio Manzanil", "Calle Rio Poqueira", "Calle Rio Trevelez", "Calle Roma", "Calle Romero", "Calle Rosa", "Calle Rosal", "Calle Rosalia de Castro", "Calle Ruben Dario", "Calle Ruiseñor", "Calle Salamanca", "Calle Salvador Dali", "Plaza San Antonio", "Calle San Jose", "Calle San Juan Nepomuceno", "Calle San Leonardo", "Calle San Luis", "Calle San Mariano", "Calle San Pablo", "Plaza San Pedro", "Calle San Vicente Paul", "Calle Santa Adela", "Calle Santa Ana", "Calle Santa Clara", "Calle Santa Fe", "Calle Santa Juliana", "Calle Santa Teresa de Jesus", "Calle Santander", "Camino de Satajardas", "Calle Segadores", "Calle Segovia", "Calle Segunda Republica", "Calle Severo Ochoa", "Calle Sevilla", "Calle Sierra Nevada", "Plaza Sol", "Avenida Sol", "Calle Solana", "Calle Solidaridad", "Calle Solitario", "Calle Sor Vicenta", "Calle Soria", "Calle Sorolla", "Calle Sosiego", "Calle Sur", "Calle Tablon", "Calle el Tamboril", "Calle Tarragona", "Calle Teide", "Calle Teruel", "Calle Tirso de Molina", "Calle Toledo", "Calle Tolerancia", "Pasaje Tomillo", "Cuesta del Tomillo", "Calle Torreon de las Infantas", "Calle Tortola", "Calle Tostadero", "Calle Tranquilidad", "Calle Transversal Camino Monachil", "Calle Transversal Plaza España", "Calle Trebol", "Calle Trevenque", "Calle Trigo", "Calle de la Trilla", "Calle Tulipan", "Calle Vacares", "Calle Vacio", "Calle Valencia", "Calle Valentia", "Calle Valladolid", "Calle Valle Inclan", "Calle Vega", "Calle Vegas del Genil", "Calle Veleta", "Calle Vencejo", "Calle Vendimia", "Calle Venus", "Calle Via del Tranvia", "Calle Vicente Aleixandre", "Calle Victor Jara", "Calle Violeta", "Calle Viznar", "Calle de la Yedra", "Calle Zacatin", "Calle Zamora", "Calle Zaragoza"];
@@ -2165,8 +2171,8 @@ async function abrirAdminCatalogos(){
 }
 function renderListasAdmin(){
   document.getElementById('listaTiposTurno').innerHTML=CAT_TIPOS_TURNO.map(function(t){
-    return '<div class="staged-item"><span>'+t.nombre+' — '+(t.sinHorario?'Sin horario definido':(t.horaInicio+'–'+t.horaFin))+(t.tieneExtra?' (+ extra '+t.horaInicioExtra+'–'+t.horaFinExtra+')':'')+'</span>'+
-      '<span><button class="btn-ghost" onclick="editarTipoTurnoPrompt(\''+t.id+'\',\''+t.nombre+'\',\''+t.horaInicio+'\',\''+t.horaFin+'\')">✏️</button>'+
+    return '<div class="staged-item"><span>'+t.nombre+' — '+(t.sinHorario?'Sin horario definido':(t.horaInicio+'–'+t.horaFin))+(t.tieneExtra?' (+ extra '+t.horaInicioExtra+'–'+t.horaFinExtra+')':'')+(t.franjas?' · franjas: '+t.franjas:'')+'</span>'+
+      '<span><button class="btn-ghost" onclick="editarTipoTurnoPrompt(\''+t.id+'\',\''+t.nombre+'\',\''+t.horaInicio+'\',\''+t.horaFin+'\',\''+(t.franjas||'')+'\')">✏️</button>'+
       '<button class="btn-ghost" onclick="desactivarTipoTurno(\''+t.id+'\')">🗑</button></span></div>';
   }).join('')||'<div style="font-size:12px;color:var(--txt2)">Sin tipos aún</div>';
   document.getElementById('listaUnidades').innerHTML=CAT_UNIDADES.map(function(u){
@@ -2255,11 +2261,12 @@ async function toggleEmpresaGrua(id,nuevoActiva){
 
 // Edición rápida mediante prompt() — suficiente para corregir un horario o
 // código mal escrito (Reporte 6), sin necesitar un formulario nuevo aparte.
-async function editarTipoTurnoPrompt(id,nombreActual,hIniActual,hFinActual){
+async function editarTipoTurnoPrompt(id,nombreActual,hIniActual,hFinActual,franjasActual){
   var nombre=prompt('Nombre del tipo de turno:',nombreActual); if(nombre===null)return;
   var hIni=prompt('Hora de inicio (HH:MM):',hIniActual); if(hIni===null)return;
   var hFin=prompt('Hora de fin (HH:MM):',hFinActual); if(hFin===null)return;
-  var r=await api('actualizarTipoTurno',{id:id,nombre:nombre,horaInicio:hIni,horaFin:hFin});
+  var franjas=prompt('Franjas que cubre (Mañana,Tarde,Noche — separadas por coma, vacío = detectar por el nombre):',franjasActual||''); if(franjas===null)return;
+  var r=await api('actualizarTipoTurno',{id:id,nombre:nombre,horaInicio:hIni,horaFin:hFin,franjas:franjas.split(',').map(function(s){return s.trim();}).filter(Boolean)});
   if(r.ok){toast('Tipo de turno actualizado');await cargarCatalogos();renderListasAdmin();}
   else toast(r.error||'Error');
 }
@@ -2301,6 +2308,7 @@ function toggleSinHorarioAdmin(){
 
 async function guardarNuevoTipoTurno(){
   var sinHorario=document.getElementById('admTipoSinHorario').checked;
+  var franjas=Array.prototype.slice.call(document.querySelectorAll('#admTipoFranjas button.on-correcto')).map(function(b){return b.getAttribute('data-franja');});
   var d={
     nombre:document.getElementById('admTipoNombre').value,
     horaInicio:sinHorario?'':document.getElementById('admTipoHIni').value,
@@ -2308,12 +2316,14 @@ async function guardarNuevoTipoTurno(){
     sinHorario:sinHorario,
     tieneExtra:document.getElementById('admTipoTieneExtra').checked,
     horaInicioExtra:document.getElementById('admTipoHIniExtra').value,
-    horaFinExtra:document.getElementById('admTipoHFinExtra').value
+    horaFinExtra:document.getElementById('admTipoHFinExtra').value,
+    franjas:franjas
   };
   if(!d.nombre||(!sinHorario&&(!d.horaInicio||!d.horaFin))){toast('Completa nombre y horario (o marca "Sin horario fijo")');return;}
   var r=await api('crearTipoTurno',d);
   if(r.ok){toast('Tipo de turno añadido');await cargarCatalogos();renderListasAdmin();
-    document.getElementById('admTipoNombre').value='';document.getElementById('admTipoSinHorario').checked=false;toggleSinHorarioAdmin();}
+    document.getElementById('admTipoNombre').value='';document.getElementById('admTipoSinHorario').checked=false;toggleSinHorarioAdmin();
+    document.querySelectorAll('#admTipoFranjas button').forEach(function(b){b.classList.remove('on-correcto');});}
   else toast(r.error||'Error');
 }
 async function guardarNuevaUnidad(){
@@ -4036,11 +4046,12 @@ async function abrirDetalleOrden(id){
   document.getElementById('modalDetalleOrden').classList.add('show');
 }
 function _descripcionAlcanceTarea(t){
-  if(t.alcanceTipo==='turnoConcreto')return 'Turno concreto';
-  if(t.alcanceTipo==='turnosDia')return 'Turnos del '+formatearFechaInvertida(t.alcanceFecha);
-  if(t.alcanceTipo==='rangoFechas')return 'Todos los turnos hasta '+formatearFechaInvertida(t.alcanceFecha);
-  if(t.alcanceTipo==='recurrente')return 'Recurrente ('+(t.alcanceTiposTurno||'todos los tipos')+')';
-  return t.alcanceTipo||'—';
+  var base=t.alcanceTipo==='turnoConcreto'?'Turno concreto':
+    (t.alcanceTipo==='turnosDia'?'Turnos del '+formatearFechaInvertida(t.alcanceFecha):
+    (t.alcanceTipo==='rangoFechas'?'Todos los turnos hasta '+formatearFechaInvertida(t.alcanceFecha):
+    (t.alcanceTipo==='recurrente'?'Recurrente ('+(t.alcanceTiposTurno||'todos los tipos')+')':(t.alcanceTipo||'—'))));
+  var dias=String(t.alcanceDiasSemana||'').split(',').filter(Boolean);
+  return base+(dias.length?' · solo '+dias.join('-'):'');
 }
 async function generarDocumentoOrden(tipo){
   var id=document.getElementById('detalleOrdenContenido').dataset.ordenId;
